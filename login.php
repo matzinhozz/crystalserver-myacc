@@ -142,6 +142,62 @@ switch ($action) {
       'currenttournamentphase'     => 2
     ];
 
+    if (empty($result->email) || $result->email === '@livestream') {
+        $columns = 'name, level, sex, vocation, looktype, lookhead, lookbody, looklegs, lookfeet, lookaddons, lastlogin';
+        $liveCastersQuery = $db->query(
+            "SELECT {$columns} FROM players p " .
+            "JOIN active_livestream_casters lc ON p.id = lc.caster_id " .
+            "WHERE lc.livestream_status >= 1"
+        );
+
+        $characters = [];
+        if ($liveCastersQuery && $liveCastersQuery->rowCount() > 0) {
+            foreach ($liveCastersQuery->fetchAll() as $caster) {
+                $characters[] = [
+                    'worldid'                          => 0,
+                    'name'                             => $caster['name'],
+                    'ismale'                           => intval($caster['sex']) === 1,
+                    'tutorial'                         => false,
+                    'level'                            => intval($caster['level']),
+                    'vocation'                         => $config['vocations'][$caster['vocation']],
+                    'outfitid'                         => intval($caster['looktype']),
+                    'headcolor'                        => intval($caster['lookhead']),
+                    'torsocolor'                       => intval($caster['lookbody']),
+                    'legscolor'                        => intval($caster['looklegs']),
+                    'detailcolor'                      => intval($caster['lookfeet']),
+                    'addonsflags'                      => intval($caster['lookaddons']),
+                    'ishidden'                         => false,
+                    'istournamentparticipant'          => false,
+                    'ismaincharacter'                  => false,
+                    'dailyrewardstate'                 => 0,
+                    'remainingdailytournamentplaytime' => 0
+                ];
+            }
+        }
+
+        if (empty($characters)) {
+            sendError('Sem casts ativos no momento.');
+        }
+
+        $worlds   = [$world];
+        $playdata = compact('worlds', 'characters');
+        $session  = [
+            'sessionkey'                    => "@livestream\n{$result->password}",
+            'lastlogintime'                 => 0,
+            'ispremium'                     => false,
+            'premiumuntil'                  => 0,
+            'status'                        => 'active',
+            'returnernotification'          => false,
+            'showrewardnews'                => false,
+            'isreturner'                    => false,
+            'fpstracking'                   => false,
+            'optiontracking'                => false,
+            'tournamentticketpurchasestate' => 0,
+            'emailcoderequest'              => false
+        ];
+        die(json_encode(compact('session', 'playdata')));
+    }
+
     $account = new OTS_Account();
     $account->findByEmail($result->email);
     $config_salt_enabled = fieldExist('salt', 'accounts');
