@@ -101,20 +101,17 @@ switch ($action) {
       $response = json_encode([
         "Success"   => true,
         "AccountID" => createAccount([
-            "email"         => $email,
-            "password"      => $result->Password,
-            "characterName" => stripslashes(ucwords(strtolower($result->CharacterName))),
-            "characterSex"  => $result->CharacterSex == 'male' ? 1 : 0,
-            //"clientType"      => "Client",
-            //"recaptcha2token" => "",
-            //"recaptcha3token" => "",
-            //"selectedWorld"   => configLua('serverName'),
-          ]),
-          // "Password" => $result->Password
-        ]);
-      } else {
-        throw new Exception('Email validation failed');
-      }
+          "email"         => $email,
+          "password"      => $result->Password,
+          "characterName" => stripslashes(ucwords(strtolower($result->CharacterName))),
+          "characterSex"  => $result->CharacterSex == 'male' ? 1 : 0,
+          //"clientType"      => "Client",
+          //"recaptcha2token" => "",
+          //"recaptcha3token" => "",
+          //"selectedWorld"   => configLua('serverName'),
+        ]),
+        // "Password" => $result->Password
+      ]);
     } catch (Exception $e) {
       $errorMessage = $e->getMessage();
       $trace = $e->getTraceAsString();
