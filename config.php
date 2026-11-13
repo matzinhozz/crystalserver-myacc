@@ -39,7 +39,7 @@ $config = array(
 
 	// what client version are you using on this OT?
 	// used for the Downloads page and some templates as well
-	'client' => 1511, // 1500 = client 15.11
+	'client' => 1524, // 1524 = client 15.24
 
 	'session_prefix' => 'myaac_', // must be unique for every site on your server
 	'friendly_urls' => false, // mod_rewrite is required for this, it makes links looks more elegant to eye, and also are SEO friendly (example: https://localhost/guilds/Testing instead of https://localhost?subtopic=guilds&name=Testing). Remember to rename .htaccess.dist to .htaccess
@@ -80,12 +80,10 @@ $config = array(
 	'database_persistent' => false, // use database permanent connection (like server), may speed up your site
 	'database_encryption' => 'sha1',
 
-	// multiworld system (only TFS 0.3)
-	'multiworld' => false, // use multiworld system?
-	'worlds' => array( // list of worlds
-		//'1' => 'Your World Name',
-		//'2' => 'Your Second World Name'
-	),
+	// multiworld system: worlds are now read from the `worlds` database table (see system/pages/worlds.php)
+
+	// show the world/vocation filter selectors on listing pages (online, highscores, etc.)
+	'show_filters' => true,
 
 	// images
 	'outfit_images_url' => './outfit/animoutfit.php', // set to animoutfit.php for animated outfit
