@@ -13,8 +13,8 @@ require BASE . 'install/includes/functions.php';
 require BASE . 'install/includes/locale.php';
 require SYSTEM . 'clients.conf.php';
 
-if (file_exists(BASE . 'config.local.php')) {
-  require BASE . 'config.local.php';
+if (file_exists(CONFIG_DIR . 'config.local.php')) {
+  require CONFIG_DIR . 'config.local.php';
 }
 
 // ignore undefined index from Twig autoloader
@@ -47,6 +47,11 @@ if (isset($_POST['vars'])) {
   foreach ($install_status as $key => $value) {
     $_SESSION['var_' . $key] = $value;
   }
+}
+
+// pre-fill server path (used by docker)
+if (getenv('MYAAC_INSTALL_SERVER_PATH') && empty($_SESSION['var_server_path'])) {
+  $_SESSION['var_server_path'] = getenv('MYAAC_INSTALL_SERVER_PATH');
 }
 
 if ($step == 'finish' && (!isset($config['installed']) || !$config['installed'])) {
@@ -118,7 +123,7 @@ if ($step == 'database') {
   }
 } elseif ($step == 'admin') {
   if (
-    !file_exists(BASE . 'config.local.php') ||
+    !file_exists(CONFIG_DIR . 'config.local.php') ||
     !isset($config['installed']) ||
     !$config['installed']
   ) {
@@ -197,7 +202,7 @@ if (is_writable(CACHE) && (MYAAC_OS != 'WINDOWS' || win_is_writable(CACHE))) {
     $allow = false;
     $listIP = preg_split('/\s+/', $file_content);
     foreach ($listIP as $ip) {
-      if ($_SERVER['REMOTE_ADDR'] == $ip) {
+      if ($ip == '*' || $_SERVER['REMOTE_ADDR'] == $ip) {
         $allow = true;
       }
     }

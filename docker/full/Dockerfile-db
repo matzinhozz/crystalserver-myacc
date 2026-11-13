@@ -1,0 +1,12 @@
+# MariaDB, same as Crystal Server's own docker setup
+# (its schema.sql is rejected by MySQL 8.4, because of restrict_fk_on_non_standard_key)
+FROM docker.io/mariadb:11.8
+
+# Crystal Server database schema, imported on first start
+# (keep in sync with Dockerfile)
+ARG CRYSTALSERVER_REF=7c6c330899cd0a4d6547d7416a0d3f5bdbd29a3e
+ADD https://raw.githubusercontent.com/zimbadev/crystalserver/${CRYSTALSERVER_REF}/schema.sql /docker-entrypoint-initdb.d/crystalserver_schema.sql
+
+RUN chmod 644 /docker-entrypoint-initdb.d/crystalserver_schema.sql
+
+EXPOSE 3306

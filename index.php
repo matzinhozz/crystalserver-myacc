@@ -52,8 +52,8 @@ if (preg_match("/^(.*)\.(gif|jpg|png|jpeg|tiff|bmp|css|js|less|map|html|php|zip|
     exit;
 }
 
-if (file_exists(BASE . 'config.local.php')) {
-    require_once BASE . 'config.local.php';
+if (file_exists(CONFIG_DIR . 'config.local.php')) {
+    require_once CONFIG_DIR . 'config.local.php';
 }
 
 ini_set('log_errors', 1);

@@ -7,7 +7,7 @@ if(!isset($database_migration_20)) {
 function databaseMigration20(&$content = '') {
 	global $db;
 
-	$config_file = BASE . 'config.local.php';
+	$config_file = CONFIG_DIR . 'config.local.php';
 	if(!is_writable($config_file)) { // we can't do anything, just ignore
 		return false;
 	}

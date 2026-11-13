@@ -10,9 +10,9 @@ defined('MYAAC') or die('Direct access not allowed!');
 
 // load configuration
 require_once BASE . 'config.php';
-if (file_exists(BASE . 'config.local.php')) {
+if (file_exists(CONFIG_DIR . 'config.local.php')) {
   // user customizations
-  require BASE . 'config.local.php';
+  require CONFIG_DIR . 'config.local.php';
 }
 
 if (!isset($config['installed']) || !$config['installed']) {

@@ -89,7 +89,7 @@ if (!$error) {
 
                 $saved = true;
                 if (!$error) {
-                    $saved = file_put_contents(BASE . 'config.local.php', $content);
+                    $saved = file_put_contents(CONFIG_DIR . 'config.local.php', $content);
                 }
 
                 if ($saved) {
@@ -101,7 +101,7 @@ if (!$error) {
                     $_SESSION['config_content'] = $content;
                     unset($_SESSION['saved']);
 
-                    $locale['step_database_error_file'] = str_replace('$FILE$', '<b>' . BASE . 'config.local.php</b>', $locale['step_database_error_file']);
+                    $locale['step_database_error_file'] = str_replace('$FILE$', '<b>' . CONFIG_DIR . 'config.local.php</b>', $locale['step_database_error_file']);
                     error($locale['step_database_error_file'] . '<br/><textarea cols="70" rows="10">' . $content . '</textarea>');
                 }
             }
