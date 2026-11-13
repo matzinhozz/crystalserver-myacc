@@ -3,7 +3,7 @@ global $config;
 
 require_once('common.php');
 require_once('config.php');
-require_once('config.local.php');
+require_once(CONFIG_DIR . 'config.local.php');
 ?>
 
 <html>

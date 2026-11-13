@@ -20,7 +20,7 @@ global $config, $db, $template_path, $logged, $status, $content, $hooks, $twig_l
 
 require_once('common.php');
 require_once('config.php');
-require_once('config.local.php');
+require_once(CONFIG_DIR . 'config.local.php');
 require_once(SYSTEM . 'functions.php');
 require_once(SYSTEM . 'init.php');
 require_once(SYSTEM . 'status.php');

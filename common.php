@@ -106,8 +106,13 @@ define('BASE_DIR', $basedir);
 
 $TABLE_PREFIX = TABLE_PREFIX;
 
-if (file_exists(BASE . 'config.local.php') && !defined('MYAAC_INSTALL')) {
-    require BASE . 'config.local.php';
+// directory where config.local.php is kept (can be moved outside of the web root, e.g. docker volume)
+$configDir = getenv('MYAAC_CONFIG_DIR');
+define('CONFIG_DIR', $configDir ? rtrim($configDir, "/\\") . DIRECTORY_SEPARATOR : BASE);
+unset($configDir);
+
+if (file_exists(CONFIG_DIR . 'config.local.php') && !defined('MYAAC_INSTALL')) {
+    require CONFIG_DIR . 'config.local.php';
 }
 
 if (!IS_CLI) {

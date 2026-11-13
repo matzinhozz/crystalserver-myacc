@@ -1,0 +1,94 @@
+name: crystalserver-myacc
+services:
+  web:
+    environment:
+      MYAAC_INSTALL_SERVER_PATH: "/srv/server"
+      MYAAC_CONFIG_DIR: "/config"
+    ports:
+      # change the port with MYAAC_HTTP_PORT, e.g. MYAAC_HTTP_PORT=8001 docker compose up
+      - 127.0.0.1:${MYAAC_HTTP_PORT:-80}:80
+    build:
+      context: ../../
+      dockerfile: docker/full/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - type: bind
+        source: ../../
+        target: /var/www/html
+      # allow the installer from the host without editing install/ip.txt
+      # (safe because the ports are bound to localhost only)
+      - type: bind
+        source: ./ip.txt
+        target: /var/www/html/install/ip.txt
+        read_only: true
+      - config:/config
+    networks:
+      - myaac-network
+
+  db:
+    restart: unless-stopped
+    environment:
+      MARIADB_RANDOM_ROOT_PASSWORD: "yes"
+      MARIADB_DATABASE: myaac
+      MARIADB_PASSWORD: myaac
+      MARIADB_USER: myaac
+    ports:
+      - 127.0.0.1:8003:3306
+    build:
+      context: ../../
+      dockerfile: docker/full/Dockerfile-db
+    volumes:
+      - db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+      start_interval: 2s
+    networks:
+      - myaac-network
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:8002:80
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: myaac
+      PMA_PASSWORD: myaac
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - myaac-network
+
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    volumes:
+      - mailpit-data:/data
+    ports:
+      - 127.0.0.1:8025:8025
+      - 127.0.0.1:1025:1025
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATABASE: /data/mailpit.db
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    networks:
+      - myaac-network
+
+volumes:
+  db:
+  config:
+  mailpit-data:
+
+networks:
+  myaac-network:
+    driver: bridge

@@ -5,8 +5,8 @@ require '../common.php';
 define('ADMIN_PANEL', true);
 define('MYAAC_ADMIN', true);
 
-if (file_exists(BASE . 'config.local.php')) {
-  require_once BASE . 'config.local.php';
+if (file_exists(CONFIG_DIR . 'config.local.php')) {
+  require_once CONFIG_DIR . 'config.local.php';
 }
 
 if (file_exists(BASE . 'install') && (!isset($config['installed']) || !$config['installed'])) {
