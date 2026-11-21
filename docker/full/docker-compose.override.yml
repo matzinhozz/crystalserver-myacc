@@ -1,0 +1,40 @@
+# Local test environment, merged automatically by `docker compose up` (run it from docker/full).
+#
+# - MyAAC reads the Crystal Server checkout next to this repository (../../../crystalserver,
+#   change it with CRYSTALSERVER_DIR=/path/to/crystalserver). The entrypoint links its folders
+#   into /srv/server and writes /srv/server/config.lua from the server's config.lua with
+#   mysqlHost = "db". Restart the web container after changing the server's config.lua.
+# - MariaDB: user root WITHOUT password, database `crystalserver`, created from the schema.sql
+#   of that checkout on the first start. Run `docker compose down -v` to import it again.
+# - MariaDB is published on 127.0.0.1:3306, so the server running on the host connects with the
+#   config.lua values: mysqlHost = "127.0.0.1", mysqlUser = "root", mysqlPass = "".
+#
+# Test environment only: never publish these ports outside localhost.
+services:
+  web:
+    volumes:
+      - type: bind
+        source: ${CRYSTALSERVER_DIR:-../../../crystalserver}
+        target: /server-src
+        read_only: true
+
+  db:
+    build: !reset null
+    image: docker.io/mariadb:11.8
+    environment: !override
+      MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: "yes"
+      MARIADB_DATABASE: crystalserver
+    ports: !override
+      - 127.0.0.1:3306:3306
+    volumes:
+      - type: bind
+        source: ${CRYSTALSERVER_DIR:-../../../crystalserver}/schema.sql
+        target: /docker-entrypoint-initdb.d/crystalserver_schema.sql
+        read_only: true
+
+  phpmyadmin:
+    environment: !override
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: ""

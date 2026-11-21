@@ -47,6 +47,18 @@ Access:
 
 Server path will be set automatically (`/srv/server`).
 
+#### Local test environment (`docker-compose.override.yml`)
+
+`docker compose up` also merges `docker/full/docker-compose.override.yml`, which changes the setup above for local testing next to a Crystal Server checkout:
+
+  * MyAAC reads the server at `../../../crystalserver` (the folder next to this repository, change it with `CRYSTALSERVER_DIR=/path/to/crystalserver`). Its folders are linked into `/srv/server` and its `config.lua` is copied with `mysqlHost = "db"`. Restart the web container after changing the server's `config.lua`.
+  * database: `127.0.0.1:3306`, user `root` **without password**, database `crystalserver`, created from the server's `schema.sql` on the first start - the server running on the host connects with `mysqlHost = "127.0.0.1"`, `mysqlUser = "root"`, `mysqlPass = ""`.
+  * phpmyadmin logs in as `root`.
+  * If the server runs on the host (not in docker), set `$config['status_ip'] = 'host.docker.internal';` in `config.local.php` (docker volume `config`), so MyAAC can check the server status.
+  * On WSL2, if Docker Desktop restarts the containers before the distro is ready, the project folder is mounted empty (403 on http://localhost). Run `docker compose up -d --force-recreate`.
+
+To use the original setup instead, run `docker compose -f docker-compose.yml up --build`.
+
 To send email you can configure SMTP Mailing with following settings:
   * Option: SMTP
   * Host: mailpit
