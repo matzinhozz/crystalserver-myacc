@@ -26,6 +26,39 @@ if [ -z "${APACHE_RUN_USER:-}" ]; then
   fi
 fi
 
+# A local Crystal Server checkout mounted at /server-src (see docker-compose.override.yml)
+# replaces the server data baked into the image: its folders are linked into the server path
+# and config.lua is copied with the database host of this compose project (last assignment wins).
+server_src="${MYAAC_SERVER_SRC:-/server-src}"
+server_path="${MYAAC_INSTALL_SERVER_PATH:-/srv/server}"
+server_path="${server_path%/}"
+if [ -f "$server_src/config.lua" ] || [ -f "$server_src/config.lua.dist" ]; then
+  case "$server_path" in
+    /srv/?*)
+      find "$server_path" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+      mkdir -p "$server_path"
+      for entry in "$server_src"/*; do
+        name="$(basename "$entry")"
+        case "$name" in config.lua | config.lua.dist) continue ;; esac
+        ln -s "$entry" "$server_path/$name"
+      done
+
+      config_src="$server_src/config.lua"
+      [ -f "$config_src" ] || config_src="$server_src/config.lua.dist"
+      {
+        cat "$config_src"
+        printf '\n-- Docker overrides (written by myaac-entrypoint from %s)\n' "$config_src"
+        printf 'mysqlHost = "%s"\nmysqlPort = %s\nmysqlSock = ""\n' "${MYAAC_DB_HOST:-db}" "${MYAAC_DB_PORT:-3306}"
+      } > "$server_path/config.lua"
+      chmod 644 "$server_path/config.lua"
+      echo "myaac-entrypoint: using server data from $server_src ($config_src)"
+      ;;
+    *)
+      echo "myaac-entrypoint: $server_src is mounted, but the server path $server_path is not under /srv, ignoring it" >&2
+      ;;
+  esac
+fi
+
 # system/logs is not part of the repository, but MyAAC needs it to write logs
 if [ ! -d system/logs ]; then
   install -d -o "$run_uid" -g "$run_gid" system/logs
