@@ -3,6 +3,20 @@ set -euo pipefail
 
 cd /var/www/html
 
+# On WSL2, Docker Desktop may start the containers (restart policy) before the distro is ready,
+# and the bind mounts come up empty. Bind mounts are set up only when the container starts, so
+# waiting here would not help: exit instead, and the restart policy (unless-stopped) starts the
+# container again (with backoff, at most 1 minute apart) until the folders are mounted.
+server_src="${MYAAC_SERVER_SRC:-/server-src}"
+if [ ! -f index.php ]; then
+  echo "myaac-entrypoint: /var/www/html is empty (bind mount not ready yet?), exiting so docker restarts the container" >&2
+  exit 1
+fi
+if [ -d "$server_src" ] && [ -z "$(ls -A "$server_src")" ]; then
+  echo "myaac-entrypoint: $server_src is empty (bind mount not ready yet?), exiting so docker restarts the container" >&2
+  exit 1
+fi
+
 run_uid="$(id -u www-data)"
 run_gid="$(id -g www-data)"
 
@@ -29,7 +43,6 @@ fi
 # A local Crystal Server checkout mounted at /server-src (see docker-compose.override.yml)
 # replaces the server data baked into the image: its folders are linked into the server path
 # and config.lua is copied with the database host of this compose project (last assignment wins).
-server_src="${MYAAC_SERVER_SRC:-/server-src}"
 server_path="${MYAAC_INSTALL_SERVER_PATH:-/srv/server}"
 server_path="${server_path%/}"
 if [ -f "$server_src/config.lua" ] || [ -f "$server_src/config.lua.dist" ]; then

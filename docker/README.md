@@ -55,7 +55,7 @@ Server path will be set automatically (`/srv/server`).
   * database: `127.0.0.1:3306`, user `root` **without password**, database `crystalserver`, created from the server's `schema.sql` on the first start - the server running on the host connects with `mysqlHost = "127.0.0.1"`, `mysqlUser = "root"`, `mysqlPass = ""`.
   * phpmyadmin logs in as `root`.
   * If the server runs on the host (not in docker), set `$config['status_ip'] = 'host.docker.internal';` in `config.local.php` (docker volume `config`), so MyAAC can check the server status.
-  * On WSL2, if Docker Desktop restarts the containers before the distro is ready, the project folder is mounted empty (403 on http://localhost). Run `docker compose up -d --force-recreate`.
+  * On WSL2, Docker Desktop may restart the containers before the distro is ready, and the bind mounts come up empty. The web container detects it (no `index.php` in the project folder, or an empty `/server-src`), exits and is restarted by docker until the folders are mounted, so the site comes back by itself within about a minute. If it still answers 403, run `docker compose up -d --force-recreate`.
 
 To use the original setup instead, run `docker compose -f docker-compose.yml up --build`.
 
